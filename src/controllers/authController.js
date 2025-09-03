@@ -29,7 +29,11 @@ export const registerController = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, message: 'User registered successfully!' });
+      .json({
+        success: true,
+        message: 'User registered successfully!',
+        user
+      });
   } catch (error) {
     console.log(`Error in register API: ${error}`.bgRed);
     res.status(500).json({

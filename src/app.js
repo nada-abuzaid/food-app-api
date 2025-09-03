@@ -1,4 +1,4 @@
-import express, { json } from 'express';
+import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { config } from 'dotenv';
@@ -9,6 +9,13 @@ config();
 connectdb();
 
 export const app = express();
-app.use([cors(), json(), morgan('dev')]);
 
-app.use(router);
+app.set('port', process.env.PORT || 3000);
+app.use([
+  cors(),
+  express.json(),
+  express.urlencoded({ extended: false }),
+  morgan('dev'),
+]);
+
+app.use('/api/v1', router);

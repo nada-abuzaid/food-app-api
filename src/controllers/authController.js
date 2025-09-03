@@ -1,11 +1,12 @@
+import { signToken } from '../helpers/index.js';
 import { User } from '../models/userModels.js';
 
-export const registerController = async (req, res) => {
+export const registerController = async (request, response) => {
   try {
-    const { username, email, password, address, phone } = req.body;
+    const { username, email, password, address, phone } = request.body;
 
     if (!username || !email || !password || !address || !phone) {
-      return res.status(500).send({
+      return response.status(500).send({
         success: false,
         message: 'Please provide all fields!',
       });
@@ -13,30 +14,33 @@ export const registerController = async (req, res) => {
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      return res.status(500).send({
+      return response.status(406).send({
         success: false,
         message: 'Email already exist, please login instead!',
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       username,
       email,
-      password,
+      password: hashedPassword,
       address,
       phone,
     });
 
-    res
-      .status(200)
+    const token = await signToken(user)
+    response
+      .status(201)
+      .cookie('token', token)
       .json({
         success: true,
         message: 'User registered successfully!',
-        user
+        data: user
       });
   } catch (error) {
     console.log(`Error in register API: ${error}`.bgRed);
-    res.status(500).json({
+    response.status(500).json({
       success: false,
       message: 'Error in register API!',
       error,

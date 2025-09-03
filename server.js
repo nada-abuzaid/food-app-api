@@ -1,4 +1,4 @@
-import app from './index.js';
+import { app } from './index.js';
 import colors from 'colors';
 
 const PORT = process.env.PORT || 3000;

@@ -1,19 +1,12 @@
-import express from 'express';
+import express, { json } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
+import { router } from './routes/index.js';
 
-dotenv.config();
+config();
 
-const app = express();
-app.use([
-    cors(),
-    express.json(),
-    morgan('dev')
-])
+export const app = express();
+app.use([cors(), json(), morgan('dev')]);
 
-app.get('/', (_req, res) => {
-  return res.status(200).send('<h1>Welcome to the Food Ordering API</h1>');
-});
-
-export default app;
+app.use(router);

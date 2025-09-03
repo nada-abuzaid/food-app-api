@@ -1,10 +1,11 @@
 import express from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   return res.status(200).send('<h1>Welcome to the Food Ordering API</h1>');
 });
 

@@ -1,16 +1,31 @@
-import { verifyToken } from '../helpers/index.js';
+import { HTTP_STATUS, MESSAGES, verifyToken } from '../helpers/index.js';
+import { CustomError } from './customError.js';
 
 export const checkAuth = async (request, _response, next) => {
   try {
-    const token = request.headers.cookie.slice(6, request.headers.cookie.length);
+    const cookieHeader = request.headers.cookie || '';
+    const token = cookieHeader
+      .split('; ')
+      .find((row) => row.startsWith('token='))
+      ?.split('=')[1];
+
     if (!token) {
-      next(new CustomError(401, 'Forbidden'));
+      next(new CustomError(MESSAGES.ERRORS.TOKEN_MISSING, HTTP_STATUS.UNAUTHORIZED));
       return;
     }
+    
     const userPayload = await verifyToken(token);
     request.userData = userPayload;
     next();
   } catch (error) {
-    next(Error(498, 'Invalid token'));
+    if (error.message === MESSAGES.ERRORS.TOKEN_EXPIRED) {
+      next(
+        new CustomError(MESSAGES.ERRORS.TOKEN_EXPIRED, HTTP_STATUS.UNAUTHORIZED)
+      );
+    } else {
+      next(
+        new CustomError(MESSAGES.ERRORS.TOKEN_INVALID, HTTP_STATUS.UNAUTHORIZED)
+      );
+    }
   }
 };

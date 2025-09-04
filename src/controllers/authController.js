@@ -18,26 +18,33 @@ export const registerController = async (request, response, next) => {
     const { username, email, password, address, phone } = request.body;
 
     if (!username || !email || !password || !address || !phone) {
-      throw new CustomError(MESSAGES.ERRORS.MISSING_FIELDS, HTTP_STATUS.BAD_REQUEST);
+      throw new CustomError(
+        MESSAGES.ERRORS.MISSING_FIELDS,
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      throw new CustomError(MESSAGES.ERRORS.ALREADY_EXIST, HTTP_STATUS.CONFLICT);
+      throw new CustomError(
+        MESSAGES.ERRORS.ALREADY_EXIST,
+        HTTP_STATUS.CONFLICT
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const { password: userPassword, ...user } = await User.create({
+    const user = await User.create({
       username,
       email,
       password: hashedPassword,
       address,
       phone,
     });
+    const { password: userPassword, ...userData } = user.toObject();
 
     const token = await signToken({ id: user._id, role: user.role });
     response
-      .status(201)
+      .status(HTTP_STATUS.CREATED)
       .cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -46,7 +53,7 @@ export const registerController = async (request, response, next) => {
       .json({
         success: true,
         message: MESSAGES.AUTH.SUCCESS_SIGNUP,
-        data: user,
+        data: userData,
       });
   } catch (error) {
     console.log(`Error in register API: ${error}`.bgRed);
@@ -69,22 +76,32 @@ export const loginController = async (request, response, next) => {
     const { email, password } = request.body;
 
     if (!email || !password) {
-      throw new CustomError(MESSAGES.ERRORS.MISSING_FIELDS, HTTP_STATUS.BAD_REQUEST);
+      throw new CustomError(
+        MESSAGES.ERRORS.MISSING_FIELDS,
+        HTTP_STATUS.BAD_REQUEST
+      );
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      throw new CustomError(MESSAGES.ERRORS.NOT_EXIST_USER, HTTP_STATUS.NOT_FOUND);
+      throw new CustomError(
+        MESSAGES.ERRORS.NOT_EXIST_USER,
+        HTTP_STATUS.NOT_FOUND
+      );
     }
+    const { password: userPassword, ...userData } = user.toObject();
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, userPassword);
     if (!isMatch) {
-      throw new CustomError(MESSAGES.ERRORS.INVALID_CREDENTIALS, HTTP_STATUS.UNAUTHORIZED);
+      throw new CustomError(
+        MESSAGES.ERRORS.INVALID_CREDENTIALS,
+        HTTP_STATUS.UNAUTHORIZED
+      );
     }
 
     const token = await signToken({ id: user._id, role: user.role });
     response
-      .status(200)
+      .status(HTTP_STATUS.OK)
       .cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -93,7 +110,7 @@ export const loginController = async (request, response, next) => {
       .json({
         success: true,
         message: MESSAGES.AUTH.SUCCESS_LOGIN,
-        data: user,
+        data: userData,
       });
   } catch (error) {
     console.log(`Error in login API: ${error}`.bgRed);

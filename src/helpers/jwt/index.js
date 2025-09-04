@@ -1,5 +1,5 @@
-import pkg, { verify } from 'jsonwebtoken';
-const { sign } = pkg;
+import pkg from 'jsonwebtoken';
+const { sign, verify } = pkg;
 
 const { SECRET_KEY } = process.env;
 export const signToken = (payload) => {

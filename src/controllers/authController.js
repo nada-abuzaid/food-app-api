@@ -7,22 +7,16 @@ export const registerController = async (request, response) => {
     const { username, email, password, address, phone } = request.body;
 
     if (!username || !email || !password || !address || !phone) {
-      return response.status(500).send({
-        success: false,
-        message: 'Please provide all fields!',
-      });
+      throw new CustomError('All fields are required', 400);
     }
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      return response.status(406).send({
-        success: false,
-        message: 'Email already exist, please login instead!',
-      });
+      throw new CustomError('Email already exists, please login instead', 409);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const {password: userPassword, ...user } = await User.create({
+    const { password: userPassword, ...user } = await User.create({
       username,
       email,
       password: hashedPassword,
@@ -31,22 +25,21 @@ export const registerController = async (request, response) => {
     });
 
     const token = await signToken({ id: user._id, role: user.role });
-    response.status(201).cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
-    }).json({
-      success: true,
-      message: 'User registered successfully!',
-      data: user,
-    });
+    response
+      .status(201)
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      })
+      .json({
+        success: true,
+        message: 'User registered successfully!',
+        data: user,
+      });
   } catch (error) {
     console.log(`Error in register API: ${error}`.bgRed);
-    response.status(500).json({
-      success: false,
-      message: 'Error in register API!',
-      error,
-    });
+    next(error);
   }
 };
 
@@ -55,42 +48,34 @@ export const loginController = async (request, response) => {
     const { email, password } = request.body;
 
     if (!email || !password) {
-      return response.status(500).send({
-        success: false,
-        message: 'Please provide all fields!',
-      });
+      throw new CustomError('Email and password are required', 400);
     }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return response.status(404).send({
-        success: false,
-        message: 'User not found!',
-      });
+      throw new CustomError('User not found', 404);
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
-    if(!isMatch){
-      return response.status(500).json({
-        success: false,
-        message: "Invalid credentials!"
-      })
+    if (!isMatch) {
+      throw new CustomError('Invalid credentials', 401);
     }
 
     const token = await signToken({ id: user._id, role: user.role });
-    response.status(200).cookie('token', token,  {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
-    }).json({
-      success: true,
-      message: 'User login successfully!',
-      data: user,
-    });
+    response
+      .status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+      })
+      .json({
+        success: true,
+        message: 'User login successfully!',
+        data: user,
+      });
   } catch (error) {
     console.log(`Error in login API: ${error}`.bgRed);
-    response.status(500).json({
-      success: false,
-      message: 'Error in login API!',
-      error,
-    });
+    next(error)
   }
 };

@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { config } from 'dotenv';
 import { router } from './routes/index.js';
 import { connectdb } from './config/db.js';
+import { clientError, errorHandler } from './middleware/index.js';
 
 config();
 connectdb();
@@ -33,3 +34,5 @@ app.use([
 ]);
 
 app.use('/api/v1', router);
+app.use(clientError);
+app.use(errorHandler);

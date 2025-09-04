@@ -1,18 +1,28 @@
 import bcrypt from 'bcryptjs';
-import { signToken } from '../helpers/index.js';
+import { HTTP_STATUS, MESSAGES, signToken } from '../helpers/index.js';
 import { User } from '../models/userModels.js';
 
-export const registerController = async (request, response) => {
+/**
+ * Register a new user
+ *
+ * @param {Request} request - Express request object containing body with user data
+ * @param {Response} response - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Sends JSON response with created user or passes error to next()
+ *
+ * @throws {CustomError} If required fields are missing or email already exists
+ */
+export const registerController = async (request, response, next) => {
   try {
     const { username, email, password, address, phone } = request.body;
 
     if (!username || !email || !password || !address || !phone) {
-      throw new CustomError('All fields are required', 400);
+      throw new CustomError(MESSAGES.ERRORS.MISSING_FIELDS, HTTP_STATUS.BAD_REQUEST);
     }
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
-      throw new CustomError('Email already exists, please login instead', 409);
+      throw new CustomError(MESSAGES.ERRORS.ALREADY_EXIST, HTTP_STATUS.CONFLICT);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -34,7 +44,7 @@ export const registerController = async (request, response) => {
       })
       .json({
         success: true,
-        message: 'User registered successfully!',
+        message: MESSAGES.AUTH.SUCCESS_SIGNUP,
         data: user,
       });
   } catch (error) {
@@ -43,22 +53,32 @@ export const registerController = async (request, response) => {
   }
 };
 
-export const loginController = async (request, response) => {
+/**
+ * Login an existing user
+ *
+ * @param {Request} request - Express request object containing body with email and password
+ * @param {Response} response - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} Sends JSON response with user data and token or passes error to next()
+ *
+ * @throws {CustomError} If required fields are missing, user does not exist, or credentials are invalid
+ */
+export const loginController = async (request, response, next) => {
   try {
     const { email, password } = request.body;
 
     if (!email || !password) {
-      throw new CustomError('Email and password are required', 400);
+      throw new CustomError(MESSAGES.ERRORS.MISSING_FIELDS, HTTP_STATUS.BAD_REQUEST);
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      throw new CustomError('User not found', 404);
+      throw new CustomError(MESSAGES.ERRORS.NOT_EXIST_USER, HTTP_STATUS.NOT_FOUND);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new CustomError('Invalid credentials', 401);
+      throw new CustomError(MESSAGES.ERRORS.INVALID_CREDENTIALS, HTTP_STATUS.UNAUTHORIZED);
     }
 
     const token = await signToken({ id: user._id, role: user.role });
@@ -71,11 +91,11 @@ export const loginController = async (request, response) => {
       })
       .json({
         success: true,
-        message: 'User login successfully!',
+        message: MESSAGES.AUTH.SUCCESS_LOGIN,
         data: user,
       });
   } catch (error) {
     console.log(`Error in login API: ${error}`.bgRed);
-    next(error)
+    next(error);
   }
 };

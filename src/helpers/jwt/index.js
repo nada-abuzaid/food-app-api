@@ -1,8 +1,8 @@
 import pkg from 'jsonwebtoken';
 const { sign, verify } = pkg;
 
-const { SECRET_KEY } = process.env;
 export const signToken = (payload) => {
+  const { SECRET_KEY } = process.env;
   return new Promise((resolve, reject) => {
     sign(payload, SECRET_KEY, (error, token) => {
       if (error) {
@@ -15,6 +15,7 @@ export const signToken = (payload) => {
 };
 
 export const verifyToken = (token) => {
+  const { SECRET_KEY } = process.env;
   return new Promise((resolve, reject) => {
     verify(token, SECRET_KEY, (error, decoded) => {
       if (error) {

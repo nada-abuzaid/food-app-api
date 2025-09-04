@@ -1,3 +1,3 @@
-import { signToken } from './jwt/index.js';
+import { signToken, verifyToken } from './jwt/index.js';
 
-export { signToken };
+export { signToken, verifyToken };

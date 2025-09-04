@@ -1,3 +1,4 @@
 import { signToken, verifyToken } from './jwt/index.js';
+import { MESSAGES, HTTP_STATUS } from './constants.js';
 
-export { signToken, verifyToken };
+export { signToken, verifyToken, MESSAGES, HTTP_STATUS};

@@ -4,7 +4,7 @@ const { sign, verify } = pkg;
 export const signToken = (payload) => {
   const { SECRET_KEY } = process.env;
   return new Promise((resolve, reject) => {
-    sign(payload, SECRET_KEY, (error, token) => {
+    sign(payload, SECRET_KEY, { expiresIn: '1h' }, (error, token) => {
       if (error) {
         reject(error);
       } else {

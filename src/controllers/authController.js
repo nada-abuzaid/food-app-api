@@ -22,7 +22,7 @@ export const registerController = async (request, response) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
+    const {password: userPassword, ...user } = await User.create({
       username,
       email,
       password: hashedPassword,
@@ -30,8 +30,12 @@ export const registerController = async (request, response) => {
       phone,
     });
 
-    const token = await signToken({ username, email, password, address, phone });
-    response.status(201).cookie('token', token).json({
+    const token = await signToken({ id: user._id, role: user.role });
+    response.status(201).cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    }).json({
       success: true,
       message: 'User registered successfully!',
       data: user,
@@ -71,9 +75,12 @@ export const loginController = async (request, response) => {
       })
     }
 
-    const { username, address, phone } = user;
-    const token = await signToken({ username, email, address, phone, password });
-    response.status(200).cookie('token', token).json({
+    const token = await signToken({ id: user._id, role: user.role });
+    response.status(200).cookie('token', token,  {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    }).json({
       success: true,
       message: 'User login successfully!',
       data: user,

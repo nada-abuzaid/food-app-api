@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { HTTP_STATUS, MESSAGES, signToken } from '../helpers/index.js';
 import { User } from '../models/userModels.js';
+import { CustomError } from '../middleware/customError.js';
 
 /**
  * Register a new user

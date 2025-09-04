@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import { signToken } from '../helpers/index.js';
 import { User } from '../models/userModels.js';
 
@@ -29,7 +30,7 @@ export const registerController = async (request, response) => {
       phone,
     });
 
-    const token = await signToken(user);
+    const token = await signToken({ username, email, password, address, phone });
     response.status(201).cookie('token', token).json({
       success: true,
       message: 'User registered successfully!',
@@ -55,19 +56,27 @@ export const loginController = async (request, response) => {
         message: 'Please provide all fields!',
       });
     }
-    const userExists = await User.findOne({ email });
-    if (!userExists) {
+    const user = await User.findOne({ email });
+    if (!user) {
       return response.status(404).send({
         success: false,
         message: 'User not found!',
       });
     }
-    const { username, address, phone } = userExists;
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch){
+      return response.status(500).json({
+        success: false,
+        message: "Invalid credentials!"
+      })
+    }
+
+    const { username, address, phone } = user;
     const token = await signToken({ username, email, address, phone, password });
     response.status(200).cookie('token', token).json({
       success: true,
       message: 'User login successfully!',
-      data: userExists,
+      data: user,
     });
   } catch (error) {
     console.log(`Error in login API: ${error}`.bgRed);

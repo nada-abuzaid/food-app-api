@@ -10,7 +10,7 @@ export const checkAuth = async (request, _response, next) => {
       ?.split('=')[1];
 
     if (!token) {
-      next(new CustomError(MESSAGES.ERRORS.TOKEN_MISSING, HTTP_STATUS.UNAUTHORIZED));
+      next(new CustomError(MESSAGES.TOKEN.TOKEN_MISSING, HTTP_STATUS.UNAUTHORIZED));
       return;
     }
     
@@ -18,13 +18,13 @@ export const checkAuth = async (request, _response, next) => {
     request.userData = userPayload;
     next();
   } catch (error) {
-    if (error.message === MESSAGES.ERRORS.TOKEN_EXPIRED) {
+    if (error.message === MESSAGES.TOKEN.TOKEN_EXPIRED) {
       next(
-        new CustomError(MESSAGES.ERRORS.TOKEN_EXPIRED, HTTP_STATUS.UNAUTHORIZED)
+        new CustomError(MESSAGES.TOKEN.TOKEN_EXPIRED, HTTP_STATUS.UNAUTHORIZED)
       );
     } else {
       next(
-        new CustomError(MESSAGES.ERRORS.TOKEN_INVALID, HTTP_STATUS.UNAUTHORIZED)
+        new CustomError(MESSAGES.TOKEN.TOKEN_INVALID, HTTP_STATUS.UNAUTHORIZED)
       );
     }
   }

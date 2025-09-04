@@ -58,14 +58,14 @@ export const verifyToken = (token) => {
         if (error.name === 'TokenExpiredError') {
           reject(
             new CustomError(
-              MESSAGES.ERRORS.TOKEN_EXPIRED,
+              MESSAGES.TOKEN.TOKEN_EXPIRED,
               HTTP_STATUS.UNAUTHORIZED
             )
           );
         } else {
           reject(
             new CustomError(
-              MESSAGES.ERRORS.TOKEN_INVALID,
+              MESSAGES.TOKEN.TOKEN_INVALID,
               HTTP_STATUS.UNAUTHORIZED
             )
           );

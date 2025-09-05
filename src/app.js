@@ -7,11 +7,14 @@ import { config } from 'dotenv';
 import { router } from './routes/index.js';
 import { connectdb } from './config/db.js';
 import { clientError, errorHandler } from './middleware/index.js';
+import { swaggerDocs } from './config/swagger.js';
 
 config();
 connectdb();
 
 export const app = express();
+
+swaggerDocs(app);
 
 app.set('port', process.env.PORT || 3000);
 app.use([

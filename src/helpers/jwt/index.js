@@ -1,5 +1,6 @@
 import pkg from 'jsonwebtoken';
-import { MESSAGES } from '../constants.js';
+import { HTTP_STATUS, MESSAGES } from '../constants.js';
+import { CustomError } from '../../middleware/customError.js';
 
 const { sign, verify } = pkg;
 

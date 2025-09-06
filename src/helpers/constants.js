@@ -16,6 +16,13 @@ export const MESSAGES = {
     USERNAME_LENGTH: 'Username must be at least 3 characters',
     ADDRESS_REQUIRED: 'Address must be a non-empty array',
     PHONE_LENGTH: 'Phone must be at least 10 characters',
+    EMAIL_REQUIRED: 'Email is required',
+    PASSWORD_REQUIRED: 'Password is required',
+    USERNAME_REQUIRED: 'Username is required',
+    PHONE_REQUIRED: 'Phone is required',
+    ADDRESS_REQUIRED: 'Address is required',
+    USERNAME_STRING: 'Username must be a string',
+    PHONE_STRING: 'Phone must be a string',
   },
   TOKEN: {
     TOKEN_EXPIRED: 'Token has expired',

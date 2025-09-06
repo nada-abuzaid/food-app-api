@@ -17,13 +17,6 @@ export const registerController = async (request, response, next) => {
   try {
     const { username, email, password, address, phone } = request.body;
 
-    if (!username || !email || !password || !address || !phone) {
-      throw new CustomError(
-        MESSAGES.ERRORS.MISSING_FIELDS,
-        HTTP_STATUS.BAD_REQUEST
-      );
-    }
-
     const emailExists = await User.findOne({ email });
     if (emailExists) {
       throw new CustomError(
@@ -74,13 +67,6 @@ export const registerController = async (request, response, next) => {
 export const loginController = async (request, response, next) => {
   try {
     const { email, password } = request.body;
-
-    if (!email || !password) {
-      throw new CustomError(
-        MESSAGES.ERRORS.MISSING_FIELDS,
-        HTTP_STATUS.BAD_REQUEST
-      );
-    }
 
     const user = await User.findOne({ email });
     if (!user) {
